@@ -1,0 +1,17 @@
+.middle{
+    height: 100%;
+    width: 100%;
+    padding: 4rem 2rem;
+    color: aliceblue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.middle .text-first {
+    display: flex;
+}
+.text-first h2{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

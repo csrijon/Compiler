@@ -16,6 +16,7 @@ const Navbar = () => {
           <li><a href="#about">About</a></li>
           <li><a href="#services">Services</a></li>
           <li><a href="#contact">Contact</a></li>
+          <li><a href="">Login</a></li>
         </ul>
 
         <div className="hamburger" onClick={toggleMenu}>
