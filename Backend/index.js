@@ -1,4 +1,5 @@
 import express from "express"
+import fetch from "node-fetch";
 
 const port = 5000;
 const app = express()

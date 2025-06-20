@@ -1,0 +1,165 @@
+body {
+  margin: 0;
+  background-color: #1e1e1e;
+  font-family: "Courier New", monospace;
+  color: white;
+  overflow: hidden;
+}
+
+.editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.editor-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2c2c2c;
+  padding: 10px 20px;
+  font-size: 14px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.file-tab {
+  color: #d3d3d3;
+  font-size: 14px;
+}
+
+.editor-title {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 500;
+  color: #ffffffcc;
+  margin: 0;
+}
+
+.editor-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.lang-select {
+  background-color: #2c2c2c;
+  color: white;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.btn-run,
+.btn-green {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.btn-run {
+  background-color: #e91e63;
+  color: white;
+}
+
+.btn-green {
+  background-color: #3cb371;
+  color: white;
+}
+
+.btn-run:hover {
+  background-color: #d81b60;
+}
+
+.btn-green:hover {
+  background-color: #2e9d66;
+}
+
+.editor-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  flex-direction: row;
+}
+
+.code-area {
+  flex: 2;
+  background-color: #1e1e1e;
+  padding: 10px;
+  overflow: auto;
+}
+
+.code-area textarea {
+  width: 100%;
+  height: 100%;
+  background-color: #1e1e1e;
+  color: #dcdcaa;
+  font-size: 16px;
+  border: none;
+  resize: none;
+  outline: none;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.side-panel {
+  flex: 1;
+  background-color: #121212;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  border-left: 1px solid #333;
+}
+
+.stdin-section textarea,
+.stdout-section pre {
+  width: 100%;
+  background-color: #000;
+  color: white;
+  border: 1px solid #444;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.stdin-section label,
+.stdout-section label {
+  display: block;
+  margin-bottom: 6px;
+  color: #90caf9;
+  font-size: 13px;
+}
+
+/* ---------- RESPONSIVE LAYOUT ---------- */
+@media screen and (max-width: 768px) {
+  .editor-main {
+    flex-direction: column;
+  }
+
+  .code-area,
+  .side-panel {
+    width: 100%;
+    flex: none;
+    height: 50%;
+  }
+
+  .editor-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .editor-title {
+    text-align: left;
+    width: 100%;
+  }
+}
