@@ -45,6 +45,33 @@ app.post("/output/code", async (req, res) => {
    }
 });
 
+app.get("/output/code/:token",async (req,res) => {
+  const token = req.params.token
+  if (!token) {
+    res.status(200)
+     return;
+  }
+  const out_url = `https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true&fields=*`;
+  const options = {
+    method: "POST",
+    headers:{
+      "x-rapidapi-key": process.env.API_KEY,
+      "x-rapidapi-host": process.env.API_HOST
+    }
+  }
+   
+  try {
+    const outputres = await fetch(out_url,options)
+    const outputdata = await outputres.json()
+    console.log(outputdata)
+    res.status(200).json(outputdata)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({error: "something wrong "})
+  }
+
+})
+
 app.listen(port, () => {
   console.log(`the server is listen ${port}`)
 })
