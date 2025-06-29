@@ -17,6 +17,7 @@ app.get("/", (req, res) => {
 })
 app.post("/output/code", async (req, res) => {
   const { language_id, code } = req.body;
+  const usercode = Buffer.from(code).toString("base64")
   if (!language_id || !code) {
     return res.status(400).json({ error: "language_id and code are required" });
   }
@@ -29,7 +30,7 @@ app.post("/output/code", async (req, res) => {
         'x-rapidapi-host' :process.env.API_HOST
       },
        body: JSON.stringify({
-         source_code: code,
+         source_code: usercode,
       language_id: language_id
        })
     }
