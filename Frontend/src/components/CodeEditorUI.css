@@ -3,7 +3,6 @@ body {
   background-color: #1e1e1e;
   font-family: "Courier New", monospace;
   color: white;
-  overflow: hidden;
 }
 
 .editor-wrapper {
