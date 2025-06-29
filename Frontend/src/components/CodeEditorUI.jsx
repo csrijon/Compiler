@@ -1,7 +1,9 @@
 import React from "react";
 // import fetch from "node-fetch";\
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { Buffer } from 'buffer';
 import "./CodeEditorUI.css";
+
 
 const CodeEditorUI = () => {
   const languageOptions = [
@@ -54,6 +56,8 @@ const CodeEditorUI = () => {
     { id: 84, name: "Visual Basic.Net (vbnc 0.0.0.5943)" }
   ];
   const [selectlanguageid,setselectlanguageid] = useState(languageOptions[0].id)
+  const [token, settoken] = useState(0)
+  const [output,setoutput] = useState(0)
   const coderef = useRef(null)
 
   const handelclick = async () => {
@@ -77,17 +81,54 @@ try {
   }
   const data = await response.json();
   console.log(data)
+  settoken(data.token)
 } catch (error) {
    console.error("Fetch failed:", error);
 }
-   
-  }
+}
+useEffect(() => {
+  if (!token) return;
+
+  const fetchOutput = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/output/code/${token}`);
+      const text = await response.text();
+
+      console.log("📦 Raw response text:", text.slice(0, 100));
+
+      let result;
+      let raw;
+
+      try {
+        result = JSON.parse(text);
+
+        raw = result.stdout
+          ? Buffer.from(result.stdout, "base64").toString("utf-8")
+          : result.stderr
+          ? Buffer.from(result.stderr, "base64").toString("utf-8")
+          : result.compile_output
+          ? Buffer.from(result.compile_output, "base64").toString("utf-8")
+          : "⏳ Waiting for output...";
+      } catch (err) {
+        console.error("❌ Failed to parse JSON:", err);
+        return;
+      }
+
+      setoutput(raw);
+    } catch (error) {
+      console.error("Fetch error:", error.message);
+    }
+  };
+
+  fetchOutput();
+}, [token]);
 
 
   return (
     <div className="editor-wrapper">
       <div className="editor-top-bar">
         <span className="file-tab">main.py</span>
+        
         <h3 className="editor-title">Python Hello World</h3>
         <div className="editor-controls">
           <button className="btn-green">  AI</button>
@@ -112,7 +153,7 @@ try {
           </div>
           <div className="stdout-section">
             <label>Output:</label>
-            <pre>Hello, World!</pre>
+            <pre>{output}</pre>
           </div>
         </div>
       </div>
