@@ -127,7 +127,7 @@ useEffect(() => {
   return (
     <div className="editor-wrapper">
       <div className="editor-top-bar">
-        <span className="file-tab">main.py</span>
+        <span className="file-tab">main.js</span>
         
         <h3 className="editor-title">Python Hello World</h3>
         <div className="editor-controls">
