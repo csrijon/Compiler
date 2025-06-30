@@ -5,7 +5,6 @@ import cors from "cors"
 
 const port = 5000;
 const app = express()
-// app.use(cors())
 const corsoption = {
   origin: 'http://localhost:5173'
 }
@@ -72,6 +71,39 @@ app.get("/output/code/:token", async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 });
+
+app.post("/AIresponse",async(req,res) => {
+  
+  const genimi_key = process.env.gen_key
+  const gemini_url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genimi_key}`
+
+  const genoption = {
+    method: "POST",
+    headers:{
+      "Content-Type": "application/json"
+    }
+  }
+
+  const body = {
+     "contents": [
+      {
+        "parts": [
+          {
+            "text": "hello what is this ?"
+          }
+        ]
+      }
+    ]
+  }
+
+  const genresponse = await fetch(gemini_url,{
+    genoption,
+    body: JSON.stringify(body)
+  })
+  const gendata = genresponse.text()
+  console.log(gendata)
+})
+
 
 
 app.listen(port, () => {
