@@ -58,6 +58,7 @@ const CodeEditorUI = () => {
   const [selectlanguageid,setselectlanguageid] = useState(languageOptions[0].id)
   const [token, settoken] = useState(0)
   const [output,setoutput] = useState(0)
+   const [showAI, setShowAI] = useState(false);
   const coderef = useRef(null)
 
   const handelclick = async () => {
@@ -123,42 +124,77 @@ useEffect(() => {
   fetchOutput();
 }, [token]);
 
+const Aiclick = () => {
+  setShowAI(true)
+}
 
-  return (
-    <div className="editor-wrapper">
-      <div className="editor-top-bar">
-        <span className="file-tab">main.js</span>
-        
-        <h3 className="editor-title">Python Hello World</h3>
-        <div className="editor-controls">
-          <button className="btn-green">  AI</button>
-          <select className="lang-select" value={selectlanguageid} onChange={(e) => setselectlanguageid(Number(e.target.value))} >
-            {languageOptions.map((lan, index) => (
-              <option value={lan.id} key={index}>{lan.name}</option>
-            ))}
-          </select>
-          <button onClick={handelclick} className="btn-run">RUN ▶</button>
+
+ return (
+    <>
+      <div className="editor-wrapper">
+        <div className="editor-top-bar">
+          <span className="file-tab">main.js</span>
+
+          <h3 className="editor-title">Python Hello World</h3>
+          <div className="editor-controls">
+            <button className="btn-green" onClick={Aiclick}>AI</button>
+            <select
+              className="lang-select"
+              value={selectlanguageid}
+              onChange={(e) => setselectlanguageid(Number(e.target.value))}
+            >
+              {languageOptions.map((lan, index) => (
+                <option value={lan.id} key={index}>{lan.name}</option>
+              ))}
+            </select>
+            <button onClick={handelclick} className="btn-run">RUN ▶</button>
+          </div>
+        </div>
+
+        <div className="editor-main">
+          <div className="code-area">
+            <textarea ref={coderef} defaultValue={`print("Hello, World!")`} />
+          </div>
+
+          <div className="side-panel">
+            <div className="stdin-section">
+              <label>STDIN</label>
+              <textarea placeholder="Input for the program ( Optional )" />
+            </div>
+            <div className="stdout-section">
+              <label>Output:</label>
+              <pre>{output}</pre>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="editor-main">
-        <div className="code-area">
-          <textarea ref={coderef} defaultValue={`print("Hello, World!")`} />
-        </div>
-
-        <div className="side-panel">
-          <div className="stdin-section">
-            <label>STDIN</label>
-            <textarea placeholder="Input for the program ( Optional )" />
-          </div>
-          <div className="stdout-section">
-            <label>Output:</label>
-            <pre>{output}</pre>
-          </div>
-        </div>
-      </div>
+    {showAI && (
+  <div className="chatgpt-panel">
+    <div className="chatgpt-header">
+      <span>🤖 Gemini AI</span>
+      <button className="chatgpt-close" onClick={() => setShowAI(false)}>✕</button>
     </div>
-  );
+
+    <div className="chatgpt-messages">
+      {/* Example messages */}
+      <div className="chat-bubble user">How do I center a div in CSS?</div>
+      <div className="chat-bubble ai">You can use margin: auto or flexbox to center it.</div>
+    </div>
+
+    <div className="chatgpt-input-area">
+      <input
+        type="text"
+        className="chatgpt-input"
+        placeholder="Ask Gemini..."
+      />
+      <button className="chatgpt-send">➤</button>
+    </div>
+  </div>
+)}
+
+    </>
+  )
 };
 
 export default CodeEditorUI;
