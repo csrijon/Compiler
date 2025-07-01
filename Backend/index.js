@@ -20,28 +20,28 @@ app.post("/output/code", async (req, res) => {
   if (!language_id || !code) {
     return res.status(400).json({ error: "language_id and code are required" });
   }
-    const url = process.env.API_URL
-    const option = {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-        'x-rapidapi-key':process.env.API_KEY,
-        'x-rapidapi-host' :process.env.API_HOST
-      },
-       body: JSON.stringify({
-         source_code: usercode,
+  const url = process.env.API_URL
+  const option = {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+      'x-rapidapi-key': process.env.API_KEY,
+      'x-rapidapi-host': process.env.API_HOST
+    },
+    body: JSON.stringify({
+      source_code: usercode,
       language_id: language_id
-       })
-    }
-   try {
-    const responsedata = await fetch(url,option);
+    })
+  }
+  try {
+    const responsedata = await fetch(url, option);
     const resdata = await responsedata.json()
     console.log(resdata)
     res.status(200).json(resdata);
-   } catch (error) {
-   console.error(error);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Something went wrong" });
-   }
+  }
 });
 
 app.get("/output/code/:token", async (req, res) => {
@@ -72,36 +72,44 @@ app.get("/output/code/:token", async (req, res) => {
   }
 });
 
-app.post("/AIresponse",async(req,res) => {
-  
+app.post("/AIresponse", async (req, res) => {
+  const prompt = req.body?.contents?.[0]?.parts?.[0]?.text;
+  console.log(prompt)
   const genimi_key = process.env.gen_key
   const gemini_url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genimi_key}`
 
   const genoption = {
     method: "POST",
-    headers:{
+    headers: {
       "Content-Type": "application/json"
     }
   }
 
   const body = {
-     "contents": [
+    "contents": [
       {
         "parts": [
           {
-            "text": "hello what is this ?"
+            "text": prompt
           }
         ]
       }
     ]
   }
 
-  const genresponse = await fetch(gemini_url,{
-    genoption,
-    body: JSON.stringify(body)
-  })
-  const gendata = genresponse.text()
-  console.log(gendata)
+  try {
+    const genresponse = await fetch(gemini_url, {
+      ...genoption, //spread operator ...
+      body: JSON.stringify(body)
+    })
+    const gendata = await genresponse.json()
+    console.log(gendata)
+    res.status(200).json(gendata)
+  } catch (error) {
+    console.log(error)
+    res.status(401).json({ error: "geminai is not working" })
+  }
+
 })
 
 

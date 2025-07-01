@@ -55,86 +55,136 @@ const CodeEditorUI = () => {
     { id: 74, name: "TypeScript (3.7.4)" },
     { id: 84, name: "Visual Basic.Net (vbnc 0.0.0.5943)" }
   ];
-  const [selectlanguageid,setselectlanguageid] = useState(languageOptions[0].id)
+  const [selectlanguageid, setselectlanguageid] = useState(languageOptions[0].id)
   const [token, settoken] = useState(0)
-  const [output,setoutput] = useState(0)
-   const [showAI, setShowAI] = useState(false);
+  const [output, setoutput] = useState(0)
+  const [showAI, setShowAI] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [filename, setFilename] = useState("main.js");
+
   const coderef = useRef(null)
+  const inputref = useRef(null)
 
   const handelclick = async () => {
-    let source_code =coderef.current.value;
+    let source_code = coderef.current.value;
 
     const playload = {
-      language_id : selectlanguageid,
-      code:source_code
+      language_id: selectlanguageid,
+      code: source_code
     }
-try {
-   const response = await fetch("http://localhost:5000/output/code",{
-      method: "POST",
-      headers :{
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(playload)
-    })
-    if(!response.ok){
-    console.error("Server responded with error:", response.status);
-    return;
-  }
-  const data = await response.json();
-  console.log(data)
-  settoken(data.token)
-} catch (error) {
-   console.error("Fetch failed:", error);
-}
-}
-useEffect(() => {
-  if (!token) return;
-
-  const fetchOutput = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/output/code/${token}`);
-      const text = await response.text();
-
-      console.log("📦 Raw response text:", text.slice(0, 100));
-
-      let result;
-      let raw;
-
-      try {
-        result = JSON.parse(text);
-
-        raw = result.stdout
-          ? Buffer.from(result.stdout, "base64").toString("utf-8")
-          : result.stderr
-          ? Buffer.from(result.stderr, "base64").toString("utf-8")
-          : result.compile_output
-          ? Buffer.from(result.compile_output, "base64").toString("utf-8")
-          : "⏳ Waiting for output...";
-      } catch (err) {
-        console.error("❌ Failed to parse JSON:", err);
+      const response = await fetch("http://localhost:5000/output/code", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(playload)
+      })
+      if (!response.ok) {
+        console.error("Server responded with error:", response.status);
         return;
       }
-
-      setoutput(raw);
+      const data = await response.json();
+      console.log(data)
+      settoken(data.token)
     } catch (error) {
-      console.error("Fetch error:", error.message);
+      console.error("Fetch failed:", error);
+    }
+  }
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchOutput = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/output/code/${token}`);
+        const text = await response.text();
+
+        console.log("📦 Raw response text:", text.slice(0, 100));
+
+        let result;
+        let raw;
+
+        try {
+          result = JSON.parse(text);
+
+          raw = result.stdout
+            ? Buffer.from(result.stdout, "base64").toString("utf-8")
+            : result.stderr
+              ? Buffer.from(result.stderr, "base64").toString("utf-8")
+              : result.compile_output
+                ? Buffer.from(result.compile_output, "base64").toString("utf-8")
+                : "⏳ Waiting for output...";
+        } catch (err) {
+          console.error("❌ Failed to parse JSON:", err);
+          return;
+        }
+
+        setoutput(raw);
+      } catch (error) {
+        console.error("Fetch error:", error.message);
+      }
+    };
+
+    fetchOutput();
+  }, [token]);
+  const sendbuttclick = async () => {
+    const inputdata = inputref.current.value;
+    if (!inputdata.trim()) return;
+
+    const body = {
+      contents: [
+        {
+          parts: [{ text: inputdata }]
+        }
+      ]
+    };
+
+    try {
+      const res = await fetch("http://localhost:5000/AIresponse", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini didn’t return any message.";
+
+      // ✅ Add both user and AI message at once
+      setMessages(prev => [
+        ...prev,
+        { role: "user", text: inputdata },
+        { role: "ai", text: aiText }
+      ]);
+
+      inputref.current.value = "";
+
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages(prev => [
+        ...prev,
+        { role: "user", text: inputdata },
+        { role: "ai", text: "⚠️ Gemini error." }
+      ]);
     }
   };
 
-  fetchOutput();
-}, [token]);
 
-const Aiclick = () => {
-  setShowAI(true)
-}
+  const Aiclick = () => {
+    setShowAI(true)
+  }
 
-
- return (
+  return (
     <>
       <div className="editor-wrapper">
-        <div className="editor-top-bar">
-          <span className="file-tab">main.js</span>
-
+        <div className="editor-top-bar"><input
+          className="file-tab-input"
+          type="text"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+        />
           <h3 className="editor-title">Python Hello World</h3>
           <div className="editor-controls">
             <button className="btn-green" onClick={Aiclick}>AI</button>
@@ -150,12 +200,10 @@ const Aiclick = () => {
             <button onClick={handelclick} className="btn-run">RUN ▶</button>
           </div>
         </div>
-
         <div className="editor-main">
           <div className="code-area">
             <textarea ref={coderef} defaultValue={`print("Hello, World!")`} />
           </div>
-
           <div className="side-panel">
             <div className="stdin-section">
               <label>STDIN</label>
@@ -168,30 +216,33 @@ const Aiclick = () => {
           </div>
         </div>
       </div>
+      {showAI && (
+        <div className="chatgpt-panel">
+          <div className="chatgpt-header">
+            <span>🤖 CompileX AI</span>
+            <button className="chatgpt-close" onClick={() => setShowAI(false)}>✕</button>
+          </div>
+          <div className="chatgpt-messages">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`chat-bubble ${msg.role === "user" ? "user" : "ai"}`}
+              >
+                {msg.text}
+              </div>
+            ))}
+          </div>
 
-    {showAI && (
-  <div className="chatgpt-panel">
-    <div className="chatgpt-header">
-      <span>🤖 Gemini AI</span>
-      <button className="chatgpt-close" onClick={() => setShowAI(false)}>✕</button>
-    </div>
-
-    <div className="chatgpt-messages">
-      {/* Example messages */}
-      <div className="chat-bubble user">How do I center a div in CSS?</div>
-      <div className="chat-bubble ai">You can use margin: auto or flexbox to center it.</div>
-    </div>
-
-    <div className="chatgpt-input-area">
-      <input
-        type="text"
-        className="chatgpt-input"
-        placeholder="Ask Gemini..."
-      />
-      <button className="chatgpt-send">➤</button>
-    </div>
-  </div>
-)}
+          <div className="chatgpt-input-area">
+            <input ref={inputref}
+              type="text"
+              className="chatgpt-input"
+              placeholder="Ask Gemini..."
+            />
+            <button onClick={sendbuttclick} className="chatgpt-send">➤</button>
+          </div>
+        </div>
+      )}
 
     </>
   )

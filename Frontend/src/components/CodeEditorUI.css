@@ -203,7 +203,7 @@ body {
   top: 60px;
   right: 20px;
   width: 380px;
-  height: 500px;
+  height: 700px;
   background: #1e1e1e;
   border-radius: 12px;
   box-shadow: 0 0 30px rgba(0,0,0,0.4);
@@ -293,4 +293,16 @@ body {
 }
 .chatgpt-send:hover {
   background-color: #059669;
+}
+.file-tab-input {
+  background-color: transparent;
+  border: none;
+  color: #d3d3d3;
+  font-size: 14px;
+  font-family: monospace;
+  outline: none;
+  width: 100px;
+}
+.file-tab-input:focus {
+  border-bottom: 1px solid #90caf9;
 }
